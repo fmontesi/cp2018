@@ -28,7 +28,9 @@ public class Streams
 		l.add( "Flowers" );
 		l.add( "Chocolate" );
 		
-		l.stream().map( Streams::getPrice ).forEach( System.out::println );
+		l.stream().map( Streams::getPrice ).map( i -> i * 2 ).forEach(
+			System.out::println
+		);
 		
 //		List<Integer> prices = listPrices( l );
 //		for( Integer price : prices ) {
