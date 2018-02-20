@@ -10,6 +10,22 @@ import java.util.function.Consumer;
  */
 public class Streams
 {	
+	private static class C {
+		private int i;
+		private boolean b;
+		
+		public Integer m( Boolean b ) {
+			if ( b == true )
+				return 1;
+			else return 0;
+		}
+	}
+	
+	public interface I {
+		public Integer m( Boolean b );
+	}
+
+	
 	private static int i;
 	
 	public static void print( String h ) {
@@ -28,7 +44,7 @@ public class Streams
 		l.add( "Flowers" );
 		l.add( "Chocolate" );
 		
-		l.stream().map( Streams::getPrice ).map( i -> i * 2 ).forEach(
+		l.stream().parallel().map( Streams::getPrice ).map( i -> i * 2 ).forEach(
 			System.out::println
 		);
 		
