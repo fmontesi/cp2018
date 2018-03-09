@@ -1,8 +1,9 @@
 package producer_consumer;
 
+
+
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -12,13 +13,15 @@ import java.util.stream.IntStream;
  *
  * @author Fabrizio Montesi <fmontesi@imada.sdu.dk>
  */
-public class ExecutorsExample
+public class ExecutorsPoison
 {
-	private static class Product {
+	interface Product {}
+	
+	private static class ConcreteProduct implements Product {
 		private final String name;
 		private final String attributes;
 		
-		public Product( String name, String attributes )
+		public ConcreteProduct( String name, String attributes )
 		{
 			this.name = name;
 			this.attributes = attributes;
@@ -30,8 +33,9 @@ public class ExecutorsExample
 		}
 	}
 	
+	private static class PoisonPill implements Product {	}
+	
 	private static final Deque<Product> THE_LIST = new LinkedList<>();
-	private static CountDownLatch producerLatch;
 	
 	private static void produce( Deque< Product > list )
 	{
@@ -39,39 +43,41 @@ public class ExecutorsExample
 		IntStream.range( 0, 1000 ).forEach(
 			n -> {
 				Main.veryExpensiveOperation();
-				Product one = new Product( "Water bottle " + n, "Fresh" );
-				Product two = new Product( "Flower bouquet " + n, "Roses" );
+				Product one = new ConcreteProduct( "Water bottle " + n, "Fresh" );
+				Product two = new ConcreteProduct( "Flower bouquet " + n, "Roses" );
 				synchronized( list ) {
 					list.add( one );
 					list.add( two );
 				}
 			}
 		);
-		producerLatch.countDown();
+		synchronized( list ) {
+			list.add( new PoisonPill() );
+		}
 	}
 	
 	private static void consume( Deque< Product > list )
 	{
 		boolean keepRun = true;
 		while( keepRun ) {
-			if ( producerLatch.getCount() == 0 ) {
-				keepRun = false;
-			}
 			synchronized( list ) {
-				while( !list.isEmpty() ) {
+				while( !list.isEmpty() && keepRun ) {
 					Product product = list.pollFirst();
 					if ( product != null ) {
 						//System.out.println( product );
+						if ( product instanceof PoisonPill ) {
+							keepRun = false;
+						}
 					}
 				}
 			}
 		}
 	}
 	
+	// WORKS ONLY if nProducers == nConsumers
 	public static void main( int nProducers, int nConsumers )
 	{
 		int cores = Runtime.getRuntime().availableProcessors() + 1;
-		producerLatch = new CountDownLatch( nProducers );
 		ExecutorService producersExecutor = Executors.newFixedThreadPool( cores/2 );
 		ExecutorService consumersExecutor = Executors.newFixedThreadPool( cores/2 );
 		IntStream.range( 0, nProducers ).forEach( n ->

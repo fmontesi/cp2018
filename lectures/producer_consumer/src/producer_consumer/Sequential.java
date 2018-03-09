@@ -31,9 +31,10 @@ public class Sequential
 	private static void produce( Deque< Product > list )
 	{
 		// int stream range to add water bottles and flower bouquets
-		IntStream.range( 0, 100 ).forEach(
+		IntStream.range( 0, 2000 ).forEach(
 			n -> {
 				list.add( new Product( "Water bottle " + n, "Fresh" ) );
+				Main.veryExpensiveOperation();
 				list.add( new Product( "Flower bouquet " + n, "Roses" ) );
 			}
 		);
@@ -41,7 +42,9 @@ public class Sequential
 	
 	private static void consume( Deque< Product > list )
 	{
-		list.forEach( product -> System.out.println( product.toString() ) );
+		list.forEach( product -> {}
+			// System.out.println( product.toString() )
+		);
 	}
 	
 	public static void main()

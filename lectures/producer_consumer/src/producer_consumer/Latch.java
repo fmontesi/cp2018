@@ -34,11 +34,13 @@ public class Latch
 	private static void produce( Deque< Product > list )
 	{
 		// int stream range to add water bottles and flower bouquets
-		IntStream.range( 0, 1000 ).forEach(
+		IntStream.range( 0, 100000 ).forEach(
 			n -> {
+				Product one = new Product( "Water bottle " + n, "Fresh" );
+				Product two = new Product( "Flower bouquet " + n, "Roses" );
 				synchronized( list ) {
-					list.add( new Product( "Water bottle " + n, "Fresh" ) );
-					list.add( new Product( "Flower bouquet " + n, "Roses" ) );
+					list.add( one );
+					list.add( two );
 				}
 			}
 		);
@@ -47,7 +49,12 @@ public class Latch
 	
 	private static void consume( Deque< Product > list )
 	{
-		while( producerLatch.getCount() > 0 ) {
+		boolean keepRun = true;
+		
+		while( keepRun ) {
+			if ( producerLatch.getCount() == 0 ) {
+				keepRun = false;
+			}
 			synchronized( list ) {
 				while( !list.isEmpty() ) {
 					Product product = list.pollFirst();
@@ -55,7 +62,7 @@ public class Latch
 						// System.out.println( product );
 					}
 				}
-			}
+			}			
 		}
 		consumerLatch.countDown();
 	}
