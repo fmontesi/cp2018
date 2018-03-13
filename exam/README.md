@@ -11,7 +11,7 @@ You can find a list of common mistakes that people do in the exam for this cours
 
 ## Hand-in
 
-An assignment will be opened on Blackboard for handing in the project. The deadline for uploading the project on Blackboard will be: 3 May 2017 at midnight.
+An assignment will be opened on Blackboard for handing in the project. The deadline for uploading the project on Blackboard will be: *TO BE DETERMINED* at midnight.
 
 ## Report
 
