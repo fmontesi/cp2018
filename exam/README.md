@@ -52,9 +52,9 @@ Inspiration points to discuss advantages and
 limitations:
 - Readability
 - Speed
-- Memory consumption
-- Reusability (the code can be reused in different contexts)
 - Scalability (scales well with the number of cores, or amount of memory)
+- Reusability (the code can be reused in different contexts)
+- Memory consumption
 - Reliability (handling of errors/exceptions)
 
 ## Software project
