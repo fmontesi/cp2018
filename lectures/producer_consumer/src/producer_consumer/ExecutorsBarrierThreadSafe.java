@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
  *
  * @author Fabrizio Montesi <fmontesi@imada.sdu.dk>
  */
-public class ExecutorsBarrier
+public class ExecutorsBarrierThreadSafe
 {
 	interface Product {}
 	
@@ -36,11 +36,7 @@ public class ExecutorsBarrier
 	
 	private static class PoisonPill implements Product {	}
 	
-	private static final BlockingDeque<Product> THE_LIST = new LinkedBlockingDeque<>();
-	private static CyclicBarrier BARRIER;
-	private static CountDownLatch producersLatch;
-	
-	private static void produce( BlockingDeque< Product > list )
+	private static void produce( BlockingDeque< Product > list, CountDownLatch producersLatch )
 	{
 		// int stream range to add water bottles and flower bouquets
 		IntStream.range( 0, 1000 ).forEach(
@@ -55,14 +51,14 @@ public class ExecutorsBarrier
 		producersLatch.countDown();
 	}
 	
-	private static void consume( int id, BlockingDeque< Product > list )
+	private static void consume( int id, BlockingDeque< Product > list, CyclicBarrier barrier )
 	{
 		boolean keepRun = true;
 		while( keepRun ) {
 			try {
 				Product product = list.takeFirst();
 				try {
-					BARRIER.await();
+					barrier.await();
 				} catch( InterruptedException | BrokenBarrierException e ) {}
 				System.out.println( "Consumer " + id + ": " + product );
 				if ( product instanceof PoisonPill ) {
@@ -75,22 +71,23 @@ public class ExecutorsBarrier
 	// Works only if the number of products can be divided by the number of consumers
 	public static void main( int nProducers, int nConsumers )
 	{
-		producersLatch = new CountDownLatch( nProducers );
-		BARRIER = new CyclicBarrier( nConsumers );
+		final BlockingDeque<Product> list = new LinkedBlockingDeque<>();
+		final CyclicBarrier barrier = new CyclicBarrier( nConsumers );
+		final CountDownLatch producersLatch = new CountDownLatch( nProducers );
 		int cores = Runtime.getRuntime().availableProcessors() + 1;
 		ExecutorService producersExecutor = Executors.newFixedThreadPool( cores/2 );
 		ExecutorService consumersExecutor = Executors.newFixedThreadPool( cores/2 );
 		IntStream.range( 0, nProducers ).forEach( n ->
-			producersExecutor.submit( () -> produce( THE_LIST ) )
+			producersExecutor.submit( () -> produce( list, producersLatch ) )
 		);
 		IntStream.range( 0, nConsumers ).forEach( n ->
-			consumersExecutor.submit( () -> consume( n, THE_LIST ) )
+			consumersExecutor.submit( () -> consume( n, list, barrier ) )
 		);
 		
 		try {
 			producersLatch.await();
 			IntStream.range( 0, nConsumers ).forEach( n ->
-				THE_LIST.add( new PoisonPill() )
+				list.add( new PoisonPill() )
 			);
 		} catch( InterruptedException e ) {}
 		
@@ -101,6 +98,6 @@ public class ExecutorsBarrier
 			consumersExecutor.awaitTermination( 1, TimeUnit.DAYS );
 		} catch( InterruptedException e ) { e.printStackTrace(); }
 		
-		System.out.println( THE_LIST.isEmpty() );
+		System.out.println( list.isEmpty() );
 	}
 }
