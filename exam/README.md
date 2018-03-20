@@ -94,9 +94,6 @@ not work well, then you risk failing.
 
 - The project will be tested using Java 8.
 
-- Only text files should be looked into.
-A text file is a file ending with the `.txt` suffix.
-
 - Including external libraries is forbidden.
 You can only use the Java standard library.
 
