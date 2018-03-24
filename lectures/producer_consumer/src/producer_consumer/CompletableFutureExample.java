@@ -5,32 +5,49 @@
  */
 package producer_consumer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  *
  * @author fmontesi
  */
 public class CompletableFutureExample
-{	
-	public static void concurrent( int[][] matrix )
+{
+	public static void concurrent( URL[] urls )
 	{
-		CompletableFuture<Integer>[] futures = new CompletableFuture[ matrix.length ];
-		for( int row = 0; row < matrix.length; row++ ) {
-			futures[row] = CompletableFuture.supplyAsync( () -> {
-				int max = Integer.MIN_VALUE;
-				for( int e : matrix[0] ) {
-					if ( e > max ) {
-						max = e;
-					}
+		ExecutorService executor = Executors.newCachedThreadPool();
+		CompletableFuture<List<Integer>>[] futures = new CompletableFuture[urls.length];
+		int i = 0;
+		for( URL url : urls ) {
+			futures[i++] = CompletableFuture.supplyAsync( () -> {
+				try {
+					InputStream istream = url.openStream();
+					BufferedInputStream bufferedStream = new BufferedInputStream( istream );
+					BufferedReader reader = new BufferedReader(
+						new InputStreamReader( bufferedStream )
+					);
+
+					List< Integer > list = new ArrayList<>();
+					reader.lines().forEach( line -> list.add( line.length() ) );
+					return list;
+				} catch( IOException e ) {
+					e.printStackTrace();
+					return new ArrayList<>();
 				}
-				return max;
-			});
+			}, executor );
 		}
-		try {
-			Object max = CompletableFuture.anyOf( futures ).get();
-			System.out.println( (Integer)max );
-		} catch( InterruptedException | ExecutionException e ) {}
+		
+		executor.shutdown();
+		CompletableFuture.allOf( futures ).join();
 	}
 }

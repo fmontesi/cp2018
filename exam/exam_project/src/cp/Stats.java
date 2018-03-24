@@ -12,28 +12,24 @@ import java.util.List;
 public interface Stats
 {
 	/**
-	 * Returns the number of times that a number was found (in any files).
+	 * Returns the number of times that a number was found (across all files).
 	 */
 	public int occurrences( int number );
 	
 	/**
-	 * Returns the list of files that do not contain numbers that are greater than max.
-	 */
-	public List< Path > atMost( int max );
-	
-	/**
-	 * Returns the number that was found the most times.
+	 * Returns the number that was found the most times (across all files).
 	 */
 	public int mostFrequent();
 	
 	/**
-	 * Returns the number that was found the least times.
+	 * Returns the number that was found the least times (of course, you should have found it at least once).
 	 */
 	public int leastFrequent();
 	
 	/**
 	 * Returns a list of all the files found in the directory, ordered from the
-	 * one that contains numbers whose sum is the smallest (first of the list)
+	 * one that contains numbers whose sum across all lines is the smallest
+	 * (first of the list),
 	 * to the one that contains numbers whose sum is the greatest (last of the list).
 	 */
 	public List< Path > byTotals();
