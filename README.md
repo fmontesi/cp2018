@@ -5,4 +5,4 @@ This is the code repository for the course on Concurrent Programming (2018) at t
 - For exercises, see the `exercises` directory.
 - For the code developed during the lectures, see the `lectures` directory.
 - For instructions on the final exam, see the `exam` directory.
-
+- For instructions on the re-exam, see the `re-exam` directory.
