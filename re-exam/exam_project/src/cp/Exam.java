@@ -34,7 +34,7 @@ public class Exam
 	 * and the average of all numbers found inside of the text file.
 	 * 
 	 * @param dir the directory to search
-	 * @return a list of results ({@link Result}), each giving the lowest number found in a file
+	 * @return a list of results ({@link Result}), each giving the average number found in a file
 	 */
 	public static List< Result > m1( Path dir )
 	{
